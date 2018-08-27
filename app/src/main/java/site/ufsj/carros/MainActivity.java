@@ -10,7 +10,11 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.HashMap;
 
 import java.util.ArrayList;
@@ -20,36 +24,60 @@ import java.util.Vector;
 
 public class MainActivity extends Activity {
 
-    Vector<Boolean> presenca = new Vector<Boolean>();
+    ArrayList<Aluno> alunos;
+    CSVFile csvFile;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        InputStream inputStream = getResources().openRawResource(R.raw.alunos);
-        CSVFile csvFile = new CSVFile(inputStream);
-        List<String[]> alunosList = csvFile.read();
+        File file = new File("aulaAndroid.csv");
+        if(!file.exists())
+        {
+            InputStream inputStream = getResources().openRawResource(R.raw.alunos);
+            csvFile = new CSVFile();
+            List<String[]> alunosList = csvFile.read(inputStream);
 
-        ArrayList<HashMap<String, String>> alunos = new ArrayList<HashMap<String, String>>();
+            alunos = new ArrayList<Aluno>();
 
-        for(int i = 0; i < alunosList.size(); i++){
+            for(int i = 0; i < alunosList.size(); i++){
 
-            HashMap<String, String> aluno = new HashMap<String, String>();
-            aluno.put("Aluno", alunosList.get(i)[1]);
-            aluno.put("Matricula", alunosList.get(i)[0]);
-            presenca.add(true);
-            alunos.add(aluno);
+                Aluno aluno = new Aluno();
+                aluno.setNome(alunosList.get(i)[1]);
+                aluno.setMatricula(alunosList.get(i)[0]);
+                aluno.setPresenca(alunosList.get(i)[2]);
+                alunos.add(aluno);
+            }
+            csvFile.write(alunos,this);
         }
 
-        String[] from = new String[]{"Aluno", "Matricula"};
+        else
+        {
+            try {
+                InputStream inputStream = this.openFileInput("aulaAndroid.csv");
+                List<String[]> alunosList = csvFile.read(inputStream);
 
-        int layout = R.layout.carros;
+                alunos = new ArrayList<Aluno>();
 
-        int[] to = new int[]{R.id.t1, R.id.t2};
+                for(int i = 0; i < alunosList.size(); i++){
+
+                    Aluno aluno = new Aluno();
+                    aluno.setNome(alunosList.get(i)[1]);
+                    aluno.setMatricula(alunosList.get(i)[0]);
+                    aluno.setPresenca(alunosList.get(i)[2]);
+                    alunos.add(aluno);
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
 
         ListView lv = (ListView) findViewById(R.id.lv);
-        lv.setAdapter(new SimpleAdapter(this, alunos, layout, from, to));
+        lv.setAdapter(new AlunoAdapter(this,alunos));
         lv.setOnItemClickListener(mudaCor());
+
+
     }
 
     public AdapterView.OnItemClickListener mudaCor(){
@@ -60,13 +88,13 @@ public class MainActivity extends Activity {
 
                 switch(position){
                     default:
-                        if(presenca.get(position)) {
+                        if(alunos.get(position).getPresenca().contains("f")) {
                             v.setBackgroundColor(Color.GREEN);
-                            presenca.set(position, false);
+                            alunos.get(position).setPresenca("p");
                         }
                         else {
                             v.setBackgroundColor(Color.RED);
-                            presenca.set(position, true);
+                            alunos.get(position).setPresenca("f");
                         }
                         break;
                 }
@@ -76,8 +104,8 @@ public class MainActivity extends Activity {
     }
 
 
-    public void sair(View view){
+    public void onFinish(View view){
+        csvFile.write(alunos,this);
         finish();
     }
-}
 }
