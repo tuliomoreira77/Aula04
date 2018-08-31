@@ -1,14 +1,19 @@
 package site.ufsj.carros;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.Spinner;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -31,6 +36,16 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        int permissionCheck = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if(permissionCheck != PackageManager.PERMISSION_GRANTED)
+        {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    1);
+        }
 
         File file = new File("aulaAndroid.csv");
         if(!file.exists())
@@ -73,14 +88,14 @@ public class MainActivity extends Activity {
             }
         }
 
-        ListView lv = (ListView) findViewById(R.id.lv);
-        lv.setAdapter(new AlunoAdapter(this,alunos));
-        lv.setOnItemClickListener(mudaCor());
+        Spinner sp = (Spinner) findViewById(R.id.sp);
+        sp.setAdapter(new AlunoAdapter(this,alunos));
+        //sp.setOnItemClickListener(mudaCor());
 
 
     }
 
-    public AdapterView.OnItemClickListener mudaCor(){
+    /*public AdapterView.OnItemClickListener mudaCor(){
         return(new AdapterView.OnItemClickListener(){
             @Override
             public void onItemClick(AdapterView<?> av, View v, int position, long id) {
@@ -104,8 +119,8 @@ public class MainActivity extends Activity {
     }
 
 
-    public void onFinish(View view){
+    public void onFinish(){
         csvFile.write(alunos,this);
         finish();
-    }
+    }*/
 }

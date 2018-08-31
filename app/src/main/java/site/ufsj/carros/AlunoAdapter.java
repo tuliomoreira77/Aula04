@@ -53,14 +53,15 @@ public class AlunoAdapter extends BaseAdapter{
 
         TextView marca = (TextView) layout.findViewById(R.id.t2);
         marca.setText(aluno.getMatricula());
+        marca.setTextColor(Color.BLUE);
 
-        if(aluno.getPresenca().contains("p")){
+        /*if(aluno.getPresenca().contains("p")){
             layout.setBackgroundColor(Color.GREEN);
         }
         if(aluno.getPresenca().contains("f"))
         {
             layout.setBackgroundColor(Color.RED);
-        }
+        }*/
         return layout;
     }
 }
